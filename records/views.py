@@ -217,3 +217,28 @@ def record_delete(request, pk):
         return redirect('records:project_detail', pk=project_pk)
     
     return render(request, 'records/record_confirm_delete.html', {'record': record})
+
+# records/views.py の一番上の import エリア
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.forms import UserCreationForm # ← これを追加
+from .models import Project, Record
+from .forms import ProjectForm, RecordForm
+
+# ... (既存のビュー関数はそのまま) ...
+
+
+# ↓↓↓ ファイルの一番下に、以下の関数を追記 ↓↓↓
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'アカウントを作成しました。ログインしてください。')
+            return redirect('login') # ログインページへリダイレクト
+    else:
+        form = UserCreationForm()
+    
+    return render(request, 'registration/signup.html', {'form': form})
