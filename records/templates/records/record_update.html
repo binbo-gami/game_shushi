@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}記録の修正{% endblock %}
+
+{% block content %}
+    <h1>記録の修正</h1>
+    <p>プロジェクト: <strong>{{ record.project.name }}</strong></p>
+
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label for="{{ form.record_type.id_for_label }}" class="form-label">{{ form.record_type.label }}</label>
+            {{ form.record_type }}
+        </div>
+        <div class="mb-3">
+            <label for="{{ form.amount.id_for_label }}" class="form-label">{{ form.amount.label }}</label>
+            {{ form.amount }}
+        </div>
+        <div class="mb-3">
+            <label for="{{ form.character_name.id_for_label }}" class="form-label">{{ form.character_name.label }}</label>
+            {{ form.character_name }}
+        </div>
+        <div class="mb-3">
+            <label for="{{ form.character_id.id_for_label }}" class="form-label">{{ form.character_id.label }}</label>
+            {{ form.character_id }}
+        </div>
+        <div class="mb-3">
+            <label for="{{ form.memo.id_for_label }}" class="form-label">{{ form.memo.label }}</label>
+            {{ form.memo }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">更新</button>
+        <a href="{% url 'records:project_detail' record.project.pk %}" class="btn btn-secondary">キャンセル</a>
+    </form>
+{% endblock %}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>共有プロジェクト: {{ project.name }}</title>
+</head>
+<body>
+    <p style="background-color: lightyellow; border: 1px solid gold; padding: 10px;">
+        <strong>これは共有ページです。</strong>このページでは閲覧のみ可能です。
+    </p>
+
+    <h1>{{ project.name }} の詳細</h1>
+    <h2>現在の合計収支: {{ total_balance }} 円</h2>
+    <hr>
+    
+    <h3>収支記録一覧</h3>
+    <table border="1" style="width:100%; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th>記録日時</th>
+                <th>タイプ</th>
+                <th>金額</th>
+                <th>キャラ名(任意)</th>
+                <th>キャラID(任意)</th>
+                <th>メモ(任意)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td>{{ record.created_at|date:"Y/m/d H:i" }}</td>
+                <td>{{ record.get_record_type_display }}</td>
+                <td>{{ record.amount }} 円</td>
+                <td>{{ record.character_name }}</td>
+                <td>{{ record.character_id }}</td>
+                <td>{{ record.memo }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">まだ収支記録がありません。</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

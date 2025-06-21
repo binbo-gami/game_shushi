@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}プロジェクト一覧{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="mb-0">あなたのプロジェクト一覧</h1>
+    <div class="text-end">
+        こんにちは、<strong>{{ user.username }}</strong> さん | 
+        <form action="{% url 'logout' %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-link p-0">ログアウト</button>
+        </form>
+    </div>
+</div>
+
+<a href="{% url 'records:project_create' %}" class="btn btn-primary mb-3">新規プロジェクト作成</a>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-success" role="alert">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+{% for project in projects %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <h4 class="card-title">
+                    <a href="{% url 'records:project_detail' project.pk %}" class="text-decoration-none">{{ project.name }}</a>
+                </h4>
+                <p class="h4">合計収支: {{ project.total_balance }} 万ゴールド</p>
+            </div>
+            <p class="card-text"><small class="text-muted">作成日: {{ project.created_at|date:"Y年m月d日" }}</small></p>
+        </div>
+    </div>
+{% empty %}
+    <div class="alert alert-info">まだプロジェクトがありません。</div>
+{% endfor %}
+
+
+<footer class="mt-5 text-center text-muted">
+    <hr>
+    <p>問題が発生したら作成・管理者のTwitter(<a href="https://twitter.com/milie_usotsuki" target="_blank" rel="noopener noreferrer">@milie_usotsuki</a>)までお願いします。</p>
+</footer>
+
+{% endblock %}

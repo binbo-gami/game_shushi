@@ -1,0 +1,16 @@
+# .gitignore ファイル (新規作成)
+
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+db.sqlite3
+/media/
+
+# Environment variables
+.env
+
+# IDE settings
+.idea/
+.vscode/
