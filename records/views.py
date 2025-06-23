@@ -46,6 +46,7 @@ def project_create(request):
             return redirect('records:project_list')
     else:
         form = ProjectForm()
+    # ↓↓ 修正対象でした ↓↓
     return render(request, 'records/project_create.html', {'form': form})
 
 @login_required
@@ -59,6 +60,7 @@ def project_update(request, pk):
             return redirect('records:project_detail', pk=project.pk)
     else:
         form = ProjectForm(instance=project)
+    # ↓↓ 修正対象でした ↓↓
     return render(request, 'records/project_update.html', {'form': form, 'project': project})
 
 @login_required
@@ -68,6 +70,7 @@ def project_delete(request, pk):
         project.delete()
         messages.success(request, 'プロジェクトを削除しました。')
         return redirect('records:project_list')
+    # ↓↓ 修正対象でした ↓↓
     return render(request, 'records/project_confirm_delete.html', {'project': project})
 
 def signup(request):
@@ -79,6 +82,7 @@ def signup(request):
             return redirect('login')
     else:
         form = UserCreationForm()
+    # このファイルは `templates/registration/` にあるので、このままでOK
     return render(request, 'registration/signup.html', {'form': form})
 
 @login_required
@@ -103,7 +107,8 @@ def record_create(request, project_pk):
         'project': project,
         'total_balance': total_balance,
     }
-    return render(request, 'record_create.html', context)
+    # ↓↓ 今回エラーが出たのはここです。「records/」を追加します ↓↓
+    return render(request, 'records/record_create.html', context)
 
 @login_required
 def record_update(request, pk):
@@ -126,7 +131,8 @@ def record_update(request, pk):
         'record': record,
         'total_balance': total_balance,
     }
-    return render(request, 'record_update.html', context)
+    # ↓↓ 修正対象でした。「records/」を追加します ↓↓
+    return render(request, 'records/record_update.html', context)
 
 @login_required
 def record_delete(request, pk):
@@ -136,6 +142,7 @@ def record_delete(request, pk):
         record.delete()
         messages.success(request, '記録を削除しました。')
         return redirect('records:project_detail', pk=project_pk)
+    # ↓↓ 修正対象でした。「records/」を追加します ↓↓
     return render(request, 'records/record_confirm_delete.html', {'record': record})
 
 def share_project(request, token):
@@ -149,4 +156,5 @@ def share_project(request, token):
         'records': records,
         'total_balance': total_balance,
     }
+    # ↓↓ 修正対象でした ↓↓
     return render(request, 'records/share_project.html', context)
