@@ -79,19 +79,25 @@ def project_detail(request, pk):
 from .forms import ProjectForm, RecordForm # RecordForm をインポートに追加
 # ... (他のビュー関数)
 
+# records/views.py の record_create 関数
+
 @login_required
 def record_create(request, project_pk):
-    # 対象のプロジェクトを取得（もちろん、自分がオーナーのものしか取得できない）
     project = get_object_or_404(Project, pk=project_pk, owner=request.user)
     
+    records = project.record_set.all()
+    total_win = sum(record.amount for record in records if record.record_type == 'WIN')
+    total_lose = sum(record.amount for record in records if record.record_type == 'LOSE')
+    total_balance = total_win - total_lose
+
+
     if request.method == 'POST':
         form = RecordForm(request.POST)
         if form.is_valid():
             record = form.save(commit=False)
-            record.project = project  # この記録がどのプロジェクトに属するかを設定
+            record.project = project
             record.save()
             messages.success(request, '収支を記録しました。')
-            # 記録を追加したプロジェクトの詳細ページに戻る
             return redirect('records:project_detail', pk=project.pk)
     else:
         form = RecordForm()
@@ -99,8 +105,9 @@ def record_create(request, project_pk):
     context = {
         'form': form,
         'project': project,
+        'total_balance': total_balance, # ← context に合計収支を追加
     }
-    return render(request, 'records/record_create.html', context)
+    return render(request, 'record_create.html', context)
 
 
 # records/views.py
@@ -179,28 +186,33 @@ def project_list(request):
 # records/views.py
 # ... (他のビュー関数の下に追加)
 
+# records/views.py の record_update 関数
+
 @login_required
 def record_update(request, pk):
-    # 修正対象の記録を取得。ただし、その記録が自分のプロジェクトのものであることを確認
     record = get_object_or_404(Record, pk=pk, project__owner=request.user)
+    project = record.project # recordからprojectを取得
+
+    records = project.record_set.all()
+    total_win = sum(record.amount for record in records if record.record_type == 'WIN')
+    total_lose = sum(record.amount for record in records if record.record_type == 'LOSE')
+    total_balance = total_win - total_lose
     
     if request.method == 'POST':
-        # 既存のインスタンスを上書きする形でフォームを初期化
         form = RecordForm(request.POST, instance=record)
         if form.is_valid():
             form.save()
             messages.success(request, '記録を修正しました。')
-            # 修正した記録が属するプロジェクトの詳細ページに戻る
             return redirect('records:project_detail', pk=record.project.pk)
     else:
-        # 既存のインスタンスを元にフォームを初期化
         form = RecordForm(instance=record)
         
     context = {
         'form': form,
-        'record': record, # テンプレートで record オブジェクトを使えるように渡す
+        'record': record,
+        'total_balance': total_balance, # ← context に合計収支を追加
     }
-    return render(request, 'records/record_update.html', context)
+    return render(request, 'record_update.html', context)
 
 # records/views.py
 # ... (他のビュー関数の下に追加)
@@ -217,3 +229,28 @@ def record_delete(request, pk):
         return redirect('records:project_detail', pk=project_pk)
     
     return render(request, 'records/record_confirm_delete.html', {'record': record})
+
+# records/views.py の一番上の import エリア
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth.forms import UserCreationForm # ← これを追加
+from .models import Project, Record
+from .forms import ProjectForm, RecordForm
+
+# ... (既存のビュー関数はそのまま) ...
+
+
+# ↓↓↓ ファイルの一番下に、以下の関数を追記 ↓↓↓
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'アカウントを作成しました。ログインしてください。')
+            return redirect('login') # ログインページへリダイレクト
+    else:
+        form = UserCreationForm()
+    
+    return render(request, 'registration/signup.html', {'form': form})

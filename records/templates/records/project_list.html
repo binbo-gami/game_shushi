@@ -14,7 +14,11 @@
     </div>
 </div>
 
-<a href="{% url 'records:project_create' %}" class="btn btn-primary mb-3">新規プロジェクト作成</a>
+<div class="mb-3">
+    <a href="{% url 'records:project_create' %}" class="btn btn-primary">新規プロジェクト作成</a>
+    <a href="https://note.com/milie_usotsuki/n/ndef4302cdd01" target="_blank" rel="noopener noreferrer" class="btn btn-info">使い方はこちら</a>
+</div>
+
 
 {% if messages %}
     {% for message in messages %}
@@ -43,7 +47,12 @@
 
 <footer class="mt-5 text-center text-muted">
     <hr>
+    <div class="mb-3">
+        <p class="mb-0"><strong>Version: 1.1.0</strong></p>
+        <p class="mb-0"><strong>アカウント作成ページのコピーライトの誤字を修正、収支入力画面に現在の総収支を表示、使い方ページへの遷移リンクを追加。</strong></p>
+    </div>
     <p>問題が発生したら作成・管理者のTwitter(<a href="https://twitter.com/milie_usotsuki" target="_blank" rel="noopener noreferrer">@milie_usotsuki</a>)までお願いします。</p>
+    <p class="mt-3 mb-3">&copy; {% now "Y" %} みらい(milie_usotsuki)</p>
 </footer>
 
 {% endblock %}

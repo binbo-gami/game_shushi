@@ -4,6 +4,7 @@
 
 {% block content %}
     <h1>{{ project.name }} に収支を記録</h1>
+    <h3 class="text-muted mb-3">現在のプロジェクト収支: {{ total_balance }} 万ゴールド</h3>
 
     <form method="post" class="mt-4">
         {% csrf_token %}

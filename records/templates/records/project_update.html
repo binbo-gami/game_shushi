@@ -3,8 +3,9 @@
 {% block title %}プロジェクト編集{% endblock %}
 
 {% block content %}
-    <h1>プロジェクト編集</h1>
-    <p>現在のプロジェクト名: <strong>{{ project.name }}</strong></p>
+    <h1>記録の修正</h1>
+    <h3 class="text-muted mb-3">現在のプロジェクト収支: {{ total_balance }} 万ゴールド</h3>
+    <p>プロジェクト: <strong>{{ record.project.name }}</strong></p>
 
     <form method="post" class="mt-4">
         {% csrf_token %}
