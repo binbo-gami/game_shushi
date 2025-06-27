@@ -2,11 +2,12 @@
 
 {% block title %}{{ project.name }} の詳細{% endblock %}
 
-
 {% block content %}
 <div class="alert alert-warning" role="alert">
-    <strong>【重要なお知らせ】</strong> データベースのサーバー移行を行いました。万が一、ログイン後に過去のプロジェクトや収支データが表示されない場合は、お手数ですが管理者のTwitterまでご連絡ください。
-</div>
+                <strong>【重要なお知らせ】</strong><br>
+                データベースのサーバー移行を行いました。万が一、ログイン後に過去のプロジェクトや収支データが表示されない場合は、お手数ですが管理者のTwitterまでご連絡ください。
+            </div>
+            
 <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap">
     <h1 class="mb-0 me-3">{{ project.name }} の詳細</h1>
     <a href="{% url 'records:project_list' %}" class="btn btn-secondary mt-2 mt-md-0">プロジェクト一覧に戻る</a>
@@ -27,6 +28,7 @@
         <a href="{% url 'records:project_detail' project.pk %}" class="btn btn-outline-secondary ms-2">リセット</a>
     </div>
 </form>
+
 <div class="table-responsive">
     <table class="table table-striped table-hover">
         <thead class="table-light">
@@ -34,9 +36,9 @@
                 <th>記録日時</th>
                 <th>タイプ</th>
                 <th>金額(万)</th>
-                <th class="d-none d-md-table-cell">キャラ名(任意)</th>
-                <th class="d-none d-md-table-cell">キャラID(任意)</th>
-                <th class="d-none d-md-table-cell">メモ(任意)</th>
+                <th>キャラ名(任意)</th>
+                <th>キャラID(任意)</th>
+                <th>メモ(任意)</th>
                 <th>操作</th>
             </tr>
         </thead>
@@ -46,9 +48,9 @@
                 <td>{{ record.created_at|date:"Y/m/d H:i" }}</td>
                 <td>{{ record.get_record_type_display }}</td>
                 <td>{{ record.amount }}</td>
-                <td class="d-none d-md-table-cell">{{ record.character_name }}</td>
-                <td class="d-none d-md-table-cell">{{ record.character_id }}</td>
-                <td class="d-none d-md-table-cell">{{ record.memo }}</td>
+                <td>{{ record.character_name|default:"-" }}</td>
+                <td>{{ record.character_id|default:"-" }}</td>
+                <td>{{ record.memo|default:"-" }}</td>
                 <td>
                     <a href="{% url 'records:record_update' record.pk %}" class="btn btn-sm btn-outline-primary">修正</a>
                     <a href="{% url 'records:record_delete' record.pk %}" class="btn btn-sm btn-outline-danger mt-1 mt-lg-0">削除</a>
