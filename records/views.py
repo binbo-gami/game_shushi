@@ -17,20 +17,38 @@ def project_list(request):
         project.total_balance = total_win - total_lose
     return render(request, 'records/project_list.html', {'projects': projects})
 
+# records/views.py の project_detail 関数
+
 @login_required
 def project_detail(request, pk):
     project = get_object_or_404(Project, pk=pk, owner=request.user)
+    
+    # 基本となる、このプロジェクトの全収支記録を取得
     records = project.record_set.all().order_by('-created_at')
+    
+    # --- ▼▼▼ 日付フィルタリングのロジックを追加 ▼▼▼ ---
+    target_date_str = request.GET.get('date') # フォームから 'date' を取得
+
+    if target_date_str:
+        # 'date' が指定されている場合、その日付で記録を絞り込む
+        from django.utils.dateparse import parse_date
+        target_date = parse_date(target_date_str)
+        if target_date:
+            records = records.filter(created_at__date=target_date)
+    # --- ▲▲▲ ここまで追加 ▲▲▲ ---
+
+    # 合計収支を計算（絞り込まれた後の'records'を元に計算する）
     total_win = sum(record.amount for record in records if record.record_type == 'WIN')
     total_lose = sum(record.amount for record in records if record.record_type == 'LOSE')
     total_balance = total_win - total_lose
+    
     context = {
         'project': project,
         'records': records,
         'total_balance': total_balance,
     }
+    
     return render(request, 'records/project_detail.html', context)
-
 @login_required
 def project_create(request):
     if request.user.project_set.count() >= 3:
