@@ -31,6 +31,12 @@
     </div>
 </form>
 
+{% if target_date %}
+<div class="alert alert-info">
+    <h4 class="alert-heading">{{ target_date|date:"Y年m月d日" }} の収支</h4>
+    <p class="mb-0">この日の合計収支: <strong>{{ daily_balance }} 万ゴールド</strong></p>
+</div>
+{% endif %}
 <div class="table-responsive">
     <table class="table table-striped table-hover">
         <thead class="table-light">
@@ -46,7 +52,7 @@
         </thead>
         <tbody>
             {% for record in records %}
-            <tr class="{% if record.record_type == 'RSET' %}table-warning{% endif %}"></tr>
+            <tr class="{% if record.record_type == 'RSET' %}table-warning{% endif %}">
                 <td>{{ record.created_at|date:"Y/m/d H:i" }}</td>
                 <td>{{ record.get_record_type_display }}</td>
                 <td>{{ record.amount }}</td>

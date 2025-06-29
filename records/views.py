@@ -39,23 +39,47 @@ def project_list(request):
         project.total_balance = calculate_balance(project)
     return render(request, 'records/project_list.html', {'projects': projects})
 
+# records/views.py の project_detail 関数
+
 @login_required
 def project_detail(request, pk):
     project = get_object_or_404(Project, pk=pk, owner=request.user)
     
-    records = project.record_set.all().order_by('-created_at')
+    # このプロジェクトの全収支記録を基本データとして取得
+    all_records = project.record_set.all().order_by('-created_at')
     
+    # --- ▼▼▼ 日付フィルタと、その日の収支計算ロジック ▼▼▼ ---
     target_date_str = request.GET.get('date')
+    records_to_display = all_records  # 表示するレコード（デフォルトは全て）
+    target_date = None                # 選択された日付（デフォルトはなし）
+    daily_balance = None              # その日の収支（デフォルトはなし）
+
     if target_date_str:
         from django.utils.dateparse import parse_date
+        from django.db.models import Sum
+
         target_date = parse_date(target_date_str)
         if target_date:
-            records = records.filter(created_at__date=target_date)
-    
-    # 新しい計算関数を呼び出すように変更
+            # 1. 記録をフィルタリングする
+            records_to_display = all_records.filter(created_at__date=target_date)
+            
+            # 2. その日の収支だけを計算する
+            daily_win = records_to_display.filter(record_type=Record.WIN).aggregate(total=Sum('amount'))['total'] or 0
+            daily_lose = records_to_display.filter(record_type=Record.LOSE).aggregate(total=Sum('amount'))['total'] or 0
+            daily_balance = daily_win - daily_lose
+    # --- ▲▲▲ ここまで ▲▲▲ ---
+
+    # プロジェクト全体の合計収支は常に計算する
     total_balance = calculate_balance(project)
     
-    context = {'project': project, 'records': records, 'total_balance': total_balance}
+    context = {
+        'project': project,
+        'records': records_to_display,  # 表示用レコード
+        'total_balance': total_balance, # 全体の合計収支
+        'target_date': target_date,     # 選択された日付
+        'daily_balance': daily_balance, # その日の合計収支
+    }
+    
     return render(request, 'records/project_detail.html', context)
 
 @login_required
