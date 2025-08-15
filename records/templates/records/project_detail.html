@@ -18,9 +18,15 @@
 </div>
 <hr>
 
-<!-- ▼▼▼ 【追加】勝率表示ボタンと結果表示エリア ▼▼▼ -->
+<!-- ▼▼▼ 【修正箇所】勝率表示機能 ▼▼▼ -->
 <div class="my-4">
-    <button id="winRateBtn" class="btn btn-outline-primary">この期間の勝率を表示</button>
+    <button id="winRateBtn" class="btn btn-outline-primary">
+        {% if request.GET.date %}
+            この日付の勝率を表示
+        {% else %}
+            勝率を表示
+        {% endif %}
+    </button>
 </div>
 
 <div id="winRateResult" style="display: none;" class="card card-body bg-light mb-4">
@@ -33,6 +39,7 @@
     </p>
 </div>
 <!-- ▲▲▲ ここまで ▲▲▲ -->
+
 
 <h3>収支記録一覧</h3>
 
@@ -108,57 +115,46 @@
     </div>
 </div>
 
-{% endblock %}
 
-
-<!-- ▼▼▼ 【追加】勝率を計算・表示するためのJavaScript ▼▼▼ -->
-{% block scripts %}
+<!-- ▼▼▼ JavaScriptを block content の末尾に配置 ▼▼▼ -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).ready(function() {
     // 「勝率を表示」ボタンがクリックされたときの処理
     $('#winRateBtn').on('click', function() {
         
-        // 1. リクエスト先のURLを生成
         let url = "{% url 'records:calculate_win_rate' project.pk %}";
-        
-        // 2. 現在のページのURLから日付パラメータを取得
         const urlParams = new URLSearchParams(window.location.search);
         const date = urlParams.get('date');
         
-        // 3. もし日付が指定されていれば、リクエストURLに ?date=... を追加
         if (date) {
             url += "?date=" + date;
         }
 
-        // 4. Ajaxを使ってサーバーに非同期でリクエストを送信
         $.ajax({
             url: url,
             type: 'GET',
             dataType: 'json',
             success: function(data) {
-                // 5. 通信が成功したら、受け取ったデータでHTMLを更新
                 $('#totalGames').text(data.total_games);
                 $('#winCount').text(data.win_count);
                 $('#loseCount').text(data.lose_count);
                 $('#winRate').text(data.win_rate);
-                
-                // 6. 結果表示エリアをフェードインで表示
                 $('#winRateResult').fadeIn();
             },
             error: function(jqXHR, textStatus, errorThrown) {
-                // 7. 通信が失敗したらアラートを表示
-                console.error("Error: ", textStatus, errorThrown);
-                alert('勝率の取得に失敗しました。');
+                console.error("AJAX Error: ", textStatus, errorThrown);
+                console.error("Response Text: ", jqXHR.responseText);
+                alert('勝率の取得に失敗しました。詳細はブラウザの開発者コンソールを確認してください。');
             }
         });
     });
 
-    // 日付フィルターが変更されたら、一度表示した勝率を隠す
-    // `input` タグの id="date" に合わせてセレクタを修正
+    // 日付フィルターの値が変更されたら、一度表示した勝率結果を隠す
     $('#date').on('change', function() {
         $('#winRateResult').hide();
     });
 });
 </script>
+
 {% endblock %}
