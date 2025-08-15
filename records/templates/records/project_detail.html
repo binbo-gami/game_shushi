@@ -18,6 +18,22 @@
 </div>
 <hr>
 
+<!-- ▼▼▼ 【追加】勝率表示ボタンと結果表示エリア ▼▼▼ -->
+<div class="my-4">
+    <button id="winRateBtn" class="btn btn-outline-primary">この期間の勝率を表示</button>
+</div>
+
+<div id="winRateResult" style="display: none;" class="card card-body bg-light mb-4">
+    <h5 class="card-title">勝率データ</h5>
+    <p class="card-text mb-0">
+        <strong>対戦数:</strong> <span id="totalGames"></span> 回<br>
+        <strong>勝ち数:</strong> <span id="winCount"></span> 回<br>
+        <strong>負け数:</strong> <span id="loseCount"></span> 回<br>
+        <strong>勝率:</strong> <span id="winRate" class="fw-bold"></span> %
+    </p>
+</div>
+<!-- ▲▲▲ ここまで ▲▲▲ -->
+
 <h3>収支記録一覧</h3>
 
 <form method="get" class="row g-3 align-items-center mb-3">
@@ -60,8 +76,10 @@
                 <td>{{ record.character_id|default:"-" }}</td>
                 <td>{{ record.memo|default:"-" }}</td>
                 <td>
+                    {% if record.record_type != 'RSET' %}
                     <a href="{% url 'records:record_update' record.pk %}" class="btn btn-sm btn-outline-primary">修正</a>
                     <a href="{% url 'records:record_delete' record.pk %}" class="btn btn-sm btn-outline-danger mt-1 mt-lg-0">削除</a>
+                    {% endif %}
                 </td>
             </tr>
             {% empty %}
@@ -90,4 +108,57 @@
     </div>
 </div>
 
+{% endblock %}
+
+
+<!-- ▼▼▼ 【追加】勝率を計算・表示するためのJavaScript ▼▼▼ -->
+{% block scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).ready(function() {
+    // 「勝率を表示」ボタンがクリックされたときの処理
+    $('#winRateBtn').on('click', function() {
+        
+        // 1. リクエスト先のURLを生成
+        let url = "{% url 'records:calculate_win_rate' project.pk %}";
+        
+        // 2. 現在のページのURLから日付パラメータを取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const date = urlParams.get('date');
+        
+        // 3. もし日付が指定されていれば、リクエストURLに ?date=... を追加
+        if (date) {
+            url += "?date=" + date;
+        }
+
+        // 4. Ajaxを使ってサーバーに非同期でリクエストを送信
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+                // 5. 通信が成功したら、受け取ったデータでHTMLを更新
+                $('#totalGames').text(data.total_games);
+                $('#winCount').text(data.win_count);
+                $('#loseCount').text(data.lose_count);
+                $('#winRate').text(data.win_rate);
+                
+                // 6. 結果表示エリアをフェードインで表示
+                $('#winRateResult').fadeIn();
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                // 7. 通信が失敗したらアラートを表示
+                console.error("Error: ", textStatus, errorThrown);
+                alert('勝率の取得に失敗しました。');
+            }
+        });
+    });
+
+    // 日付フィルターが変更されたら、一度表示した勝率を隠す
+    // `input` タグの id="date" に合わせてセレクタを修正
+    $('#date').on('change', function() {
+        $('#winRateResult').hide();
+    });
+});
+</script>
 {% endblock %}
