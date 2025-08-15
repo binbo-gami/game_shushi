@@ -7,6 +7,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Sum
 from .models import Project, Record
 from .forms import ProjectForm, RecordForm
+from django.http import JsonResponse
 
 # --- ▼▼▼ 合計収支を計算するための、新しい共通関数 ▼▼▼ ---
 def calculate_balance(project):
@@ -208,3 +209,40 @@ def share_project(request, token):
     total_balance = calculate_balance(project)
     context = {'project': project, 'records': records, 'total_balance': total_balance}
     return render(request, 'records/share_project.html', context)
+
+@login_required
+def calculate_win_rate(request, pk):
+    project = get_object_or_404(Project, pk=pk, owner=request.user)
+    
+    # 日付フィルタのパラメータを取得
+    target_date_str = request.GET.get('date')
+    
+    # 対象となるレコードセットを準備
+    records_to_calculate = project.record_set.exclude(record_type=Record.RESET)
+
+    if target_date_str:
+        from django.utils.dateparse import parse_date
+        target_date = parse_date(target_date_str)
+        if target_date:
+            # 日付が指定されていれば、その日のレコードに絞り込む
+            records_to_calculate = records_to_calculate.filter(created_at__date=target_date)
+
+    # 勝ちと負けの数を数える
+    win_count = records_to_calculate.filter(record_type=Record.WIN).count()
+    lose_count = records_to_calculate.filter(record_type=Record.LOSE).count()
+    
+    total_games = win_count + lose_count
+    
+    # 勝率を計算（0除算を避ける）
+    if total_games > 0:
+        win_rate = (win_count / total_games) * 100
+    else:
+        win_rate = 0
+        
+    # JSON形式でデータを返す
+    return JsonResponse({
+        'win_count': win_count,
+        'lose_count': lose_count,
+        'total_games': total_games,
+        'win_rate': f'{win_rate:.2f}' # 小数点第2位まで表示
+    })
