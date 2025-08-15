@@ -17,7 +17,10 @@ urlpatterns = [
     path('projects/<int:pk>/', views.project_detail, name='project_detail'),
     path('projects/<int:pk>/update/', views.project_update, name='project_update'),
     path('projects/<int:pk>/delete/', views.project_delete, name='project_delete'),
+    path('projects/<int:pk>/calculate-win-rate/', views.calculate_win_rate, name='calculate_win_rate'),
     path('projects/<int:pk>/reset/', views.project_reset_balance, name='project_reset_balance'), # この行が新しい
+    
+
     
     # 収支記録関連
     path('projects/<int:project_pk>/records/create/', views.record_create, name='record_create'),
